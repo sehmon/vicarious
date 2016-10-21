@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/yawkity/vicarious#readme",
   "dependencies": {
+    "cookie-parser": "^1.4.3",
     "express": "^4.14.0",
     "instagram-node": "^0.5.8",
     "request": "^2.75.0"

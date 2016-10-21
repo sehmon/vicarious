@@ -1,9 +1,10 @@
 var http = require('http');
 var express = require('express');
+var cookieParser = require('cookie-parser');
 var api = require('instagram-node').instagram();
-var app = express();
 
-var urlString = "https://www.instagram.com/oauth/authorize/?client_id=73e5f31d13384082bc7f5b2cfc107c5d&redirect_uri=http://localhost:3000/auth&response_type=code"
+var app = express();
+app.use(cookieParser());
 
 api.use({
   client_id: "73e5f31d13384082bc7f5b2cfc107c5d",
@@ -11,6 +12,7 @@ api.use({
 });
 
 redirect_uri = "http://localhost:3000/auth"
+
 
 exports.authorize_user = function(req, res) {
   res.redirect(api.get_authorization_url(redirect_uri, { scope: ['likes'], state: 'a state' }));
@@ -24,6 +26,7 @@ exports.handleauth = function(req, res) {
     } else {
       console.log('Yay! Access token is ' + result.access_token);
       api.use({access_token: result.access_token});
+      res.cookie('access_token', result.access_token);
       res.send('You made it!!');
     }
   });
@@ -35,6 +38,7 @@ app.get('/authorize_user', exports.authorize_user);
 app.get('/auth', exports.handleauth);
 
 app.get('/', function(req, res) {
+  console.log("Cookies: ", req.cookies);
   res.send("Hello World");
 });
 
