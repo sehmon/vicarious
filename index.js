@@ -15,6 +15,10 @@ redirect_uri = "http://localhost:3000/auth"
 
 
 exports.authorize_user = function(req, res) {
+  spi.use({
+    client_id: "73e5f31d13384082bc7f5b2cfc107c5d",
+    client_secret: "1863b9b34a964298a3a0656b0af37ac7"
+  });
   res.redirect(api.get_authorization_url(redirect_uri, { scope: ['likes'], state: 'a state' }));
 };
  
@@ -25,9 +29,13 @@ exports.handleauth = function(req, res) {
       res.send("Didn't work");
     } else {
       console.log('Yay! Access token is ' + result.access_token);
-      api.use({access_token: result.access_token});
       res.cookie('access_token', result.access_token);
-      res.send('You made it!!');
+      api.use({
+        access_token: result.access_token,
+        client_id: "73e5f31d13384082bc7f5b2cfc107c5d",
+        client_secret: "1863b9b34a964298a3a0656b0af37ac7"
+      });
+      res.redirect('/');
     }
   });
 };
@@ -37,9 +45,17 @@ app.get('/authorize_user', exports.authorize_user);
 // This is your redirect URI 
 app.get('/auth', exports.handleauth);
 
+app.get('/logout', function(req, res) {
+  res.clearCookie('access_token');
+  res.redirect('/');
+});
+
 app.get('/', function(req, res) {
   console.log("Cookies: ", req.cookies);
-  res.send("Hello World");
+  if(req.cookies['access_token']){
+    res.send("You're logged in with access_token: " + req.cookies['access_token']);
+  }
+  res.send("Hello World, you aren't logged in");
 });
 
 app.get('/user', function(req, res) {
